@@ -137,7 +137,9 @@ extension PullRequest {
     }
     
     var webURL: URL? {
-        URL(string: "https://dev.azure.com/jobjack/\(repository.project.name)/_git/\(repository.name)/pullrequest/\(pullRequestId)")
+        let org = SettingsManager.shared.organization
+        let proj = SettingsManager.shared.project
+        return URL(string: "https://dev.azure.com/\(org)/\(proj)/_git/\(repository.name)/pullrequest/\(pullRequestId)")
     }
     
     // Convert to menu item data for assigned PRs

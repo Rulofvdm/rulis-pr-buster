@@ -92,6 +92,16 @@ class SettingsManager: ObservableObject {
         set { settings.includePRCount = newValue }
     }
     
+    var organization: String {
+        get { settings.organization }
+        set { settings.organization = newValue }
+    }
+    
+    var project: String {
+        get { settings.project }
+        set { settings.project = newValue }
+    }
+    
     var isConfigured: Bool {
         !settings.azureEmail.isEmpty && !settings.azurePAT.isEmpty
     }
@@ -116,7 +126,9 @@ class SettingsManager: ObservableObject {
                 dailyReminderTime: userDefaults.object(forKey: "dailyReminderTime") as? Date ?? Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date(),
                 intervalHours: userDefaults.object(forKey: "intervalHours") as? Int ?? 4,
                 smartNotifications: userDefaults.object(forKey: "smartNotifications") as? Bool ?? true,
-                includePRCount: userDefaults.object(forKey: "includePRCount") as? Bool ?? true
+                includePRCount: userDefaults.object(forKey: "includePRCount") as? Bool ?? true,
+                organization: userDefaults.string(forKey: "organization") ?? "jobjack",
+                project: userDefaults.string(forKey: "project") ?? "Platform"
             )
         }
         return settings
@@ -134,6 +146,8 @@ class SettingsManager: ObservableObject {
             userDefaults.set(settings.showAssignedPRs, forKey: "showAssignedPRs")
             userDefaults.set(settings.refreshInterval, forKey: "refreshInterval")
             userDefaults.set(settings.autoRefreshEnabled, forKey: "autoRefreshEnabled")
+            userDefaults.set(settings.organization, forKey: "organization")
+            userDefaults.set(settings.project, forKey: "project")
             
             userDefaults.synchronize()
         } catch {

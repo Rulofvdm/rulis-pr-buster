@@ -6,8 +6,8 @@ class PullRequestService {
             completion([])
             return
         }
-        let organization = "jobjack"
-        let project = "Platform"
+        let organization = SettingsManager.shared.organization
+        let project = SettingsManager.shared.project
         let userId = "me"
         let urlString = "https://dev.azure.com/\(organization)/\(project)/_apis/git/pullrequests?searchCriteria.reviewerId=\(userId)&status=active&api-version=7.1-preview.1"
         guard let url = URL(string: urlString) else { completion([]); return }
@@ -46,8 +46,8 @@ class PullRequestService {
             completion([])
             return
         }
-        let organization = "jobjack"
-        let project = "Platform"
+        let organization = SettingsManager.shared.organization
+        let project = SettingsManager.shared.project
         let userId = "me"
         let urlString = "https://dev.azure.com/\(organization)/\(project)/_apis/git/pullrequests?searchCriteria.creatorId=\(userId)&status=active&api-version=7.1-preview.1"
         guard let url = URL(string: urlString) else { completion([]); return }
@@ -79,8 +79,8 @@ class PullRequestService {
     }
 
     static func fetchUnresolvedCommentCount(repositoryId: String, pullRequestId: Int, pat: String, completion: @escaping (Int) -> Void) {
-        let organization = "jobjack"
-        let project = "Platform"
+        let organization = SettingsManager.shared.organization
+        let project = SettingsManager.shared.project
         let urlString = "https://dev.azure.com/\(organization)/\(project)/_apis/git/repositories/\(repositoryId)/pullRequests/\(pullRequestId)/threads?api-version=7.1"
         guard let url = URL(string: urlString) else { completion(0); return }
         var request = URLRequest(url: url)

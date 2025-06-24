@@ -18,6 +18,10 @@ struct AppSettings: Codable {
     var smartNotifications: Bool // Only show when there are pending PRs
     var includePRCount: Bool // Include PR count in notifications
     
+    // New fields for Azure DevOps organization and project
+    var organization: String
+    var project: String
+    
     static let `default` = AppSettings(
         azureEmail: "",
         azurePAT: "",
@@ -32,6 +36,8 @@ struct AppSettings: Codable {
         dailyReminderTime: Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date(),
         intervalHours: 4,
         smartNotifications: true,
-        includePRCount: true
+        includePRCount: true,
+        organization: "jobjack", // Default value
+        project: "Platform"      // Default value
     )
 } 

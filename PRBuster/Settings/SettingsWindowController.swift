@@ -7,6 +7,8 @@ class SettingsWindowController: NSWindowController {
     let autoRefreshCheckbox = NSButton(checkboxWithTitle: "Enable auto-refresh", target: nil, action: nil)
     let refreshIntervalField = NSTextField(string: "")
     let emailField = NSTextField(string: "")
+    let organizationField = NSTextField(string: "")
+    let projectField = NSTextField(string: "")
     let patField = PasteableSecureTextField(string: "")
     
     // Notification controls
@@ -58,6 +60,16 @@ class SettingsWindowController: NSWindowController {
         emailRow.spacing = 8
         emailRow.alignment = .firstBaseline
         credentialsStack.addArrangedSubview(emailRow)
+        let orgRow = NSStackView(views: [NSTextField(labelWithString: "Organization:"), organizationField])
+        orgRow.orientation = .horizontal
+        orgRow.spacing = 8
+        orgRow.alignment = .firstBaseline
+        credentialsStack.addArrangedSubview(orgRow)
+        let projRow = NSStackView(views: [NSTextField(labelWithString: "Project:"), projectField])
+        projRow.orientation = .horizontal
+        projRow.spacing = 8
+        projRow.alignment = .firstBaseline
+        credentialsStack.addArrangedSubview(projRow)
         let patRow = NSStackView(views: [NSTextField(labelWithString: "PAT/token:"), patField])
         patRow.orientation = .horizontal
         patRow.spacing = 8
@@ -111,6 +123,8 @@ class SettingsWindowController: NSWindowController {
         
         // --- Initial Values and Targets ---
         emailField.stringValue = settingsManager.azureEmail
+        organizationField.stringValue = settingsManager.organization
+        projectField.stringValue = settingsManager.project
         patField.stringValue = settingsManager.azurePAT
         showAuthoredCheckbox.state = settingsManager.showAuthoredPRs ? .on : .off
         showAssignedCheckbox.state = settingsManager.showAssignedPRs ? .on : .off
@@ -128,6 +142,10 @@ class SettingsWindowController: NSWindowController {
         // --- Targets ---
         emailField.target = self
         emailField.action = #selector(textFieldChanged)
+        organizationField.target = self
+        organizationField.action = #selector(textFieldChanged)
+        projectField.target = self
+        projectField.action = #selector(textFieldChanged)
         patField.target = self
         patField.action = #selector(textFieldChanged)
         showAuthoredCheckbox.target = self
@@ -168,6 +186,10 @@ class SettingsWindowController: NSWindowController {
         // --- Text field editability ---
         emailField.isEditable = true
         emailField.isSelectable = true
+        organizationField.isEditable = true
+        organizationField.isSelectable = true
+        projectField.isEditable = true
+        projectField.isSelectable = true
         patField.isEditable = true
         patField.isSelectable = true
         refreshIntervalField.isEditable = true
@@ -238,6 +260,8 @@ class SettingsWindowController: NSWindowController {
             settingsManager.refreshInterval = intervalMinutes * 60
         }
         settingsManager.azureEmail = emailField.stringValue
+        settingsManager.organization = organizationField.stringValue
+        settingsManager.project = projectField.stringValue
         settingsManager.azurePAT = patField.stringValue
         (NSApp.delegate as? AppDelegate)?.buildMenu()
         // Only start refresh timer if credentials are present
@@ -268,6 +292,8 @@ extension SettingsWindowController: NSWindowDelegate {
             settingsManager.refreshInterval = intervalMinutes * 60
         }
         settingsManager.azureEmail = emailField.stringValue
+        settingsManager.organization = organizationField.stringValue
+        settingsManager.project = projectField.stringValue
         settingsManager.azurePAT = patField.stringValue
         settingsManager.notificationsEnabled = notificationsEnabledCheckbox.state == .on
         settingsManager.newPRNotifications = newPRNotificationsCheckbox.state == .on
