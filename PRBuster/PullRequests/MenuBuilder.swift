@@ -121,12 +121,31 @@ class MenuBuilder {
     @objc func openAllAssignedPRs(_ sender: NSMenuItem) {
         guard let menu = sender.menu else { return }
         var urls: [URL] = []
+        var foundAssignedSection = false
+        var inAssignedSection = false
+        
         for item in menu.items {
-            if let prView = item.view as? PRMenuItemView {
-                urls.append(prView.url)
+            if item.title == "Assigned to me" {
+                foundAssignedSection = true
+                continue
+            }
+            if foundAssignedSection {
+                if item.title == "Open all assigned PRs" {
+                    inAssignedSection = true
+                    continue
+                }
+                if inAssignedSection {
+                    if let prView = item.view as? PRMenuItemView {
+                        urls.append(prView.url)
+                    } else if item.isSeparatorItem || item.title == "My Open PRs" || item.title == "No PRs authored by me" {
+                        break // Stop when we reach the authored section
+                    }
+                }
             }
         }
+        
         if urls.isEmpty, let appDelegate = NSApp.delegate as? AppDelegate {
+            // Fallback: open all assigned PRs from the data
             for pr in appDelegate.pullRequests {
                 if let url = pr.webURL {
                     NSWorkspace.shared.open(url)

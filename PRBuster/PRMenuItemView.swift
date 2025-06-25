@@ -39,11 +39,12 @@ class PRMenuItemView: NSView {
             branch: data.branch,
             reviewersStatus: data.reviewersStatus,
             url: data.url,
+            isOverdue: data.isOverdue,
             onClick: onClick
         )
     }
 
-    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, onClick: (() -> Void)? = nil) {
+    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, isOverdue: Bool = false, onClick: (() -> Void)? = nil) {
         self.url = url
         super.init(frame: .zero)
         self.onClick = onClick
@@ -76,6 +77,7 @@ class PRMenuItemView: NSView {
 
         titleLabel.stringValue = title
         titleLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        titleLabel.textColor = isOverdue ? .systemRed : .labelColor
         titleLabel.backgroundColor = .clear
         titleLabel.isBordered = false
         titleLabel.isEditable = false

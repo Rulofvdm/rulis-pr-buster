@@ -19,7 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UNUserNotificationCenter.current().delegate = notificationManager
         
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        updateMenuBar(assigned: 0, approved: 0, open: 0)
+        updateMenuBar(assigned: 0, approved: 0, open: 0, notApproved: 0, hasOverdue: false, authoredApproved: 0, totalAuthored: 0)
         
         // Request notification permissions if enabled
         if settingsManager.notificationsEnabled {
@@ -67,23 +67,50 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func updateMenuBar(assigned: Int, approved: Int, open: Int) {
+    func updateMenuBar(assigned: Int, approved: Int, open: Int, notApproved: Int = 0, hasOverdue: Bool = false, authoredApproved: Int = 0, totalAuthored: Int = 0) {
         if let button = statusItem?.button {
-            button.title = "\(assigned) | \(approved)/\(open)"
+            let title = "\(notApproved)/\(assigned) \(authoredApproved)/\(totalAuthored)"
+            button.title = title
+            
+            // Make text red if there are overdue PRs that haven't been approved
+            if hasOverdue && notApproved > 0 {
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .foregroundColor: NSColor.systemRed
+                ]
+                button.attributedTitle = NSAttributedString(string: title, attributes: attributes)
+            } else {
+                button.attributedTitle = NSAttributedString(string: title)
+            }
         }
     }
 
     func updateMenuBarWithCurrentData() {
         let myUniqueName = settingsManager.azureEmail
         let assigned = pullRequests.count
-        let openPRs = authoredPullRequests.filter { pr in
+        
+        // Calculate not approved PRs (PRs assigned to me that I haven't approved)
+        let notApproved = pullRequests.filter { pr in
+            guard let me = pr.reviewers.first(where: { $0.uniqueName == myUniqueName }) else { return false }
+            return !me.isApproved
+        }.count
+        
+        // Check if any of the PRs assigned to me are overdue AND I haven't approved them
+        let hasOverdue = pullRequests.filter { pr in
+            guard let me = pr.reviewers.first(where: { $0.uniqueName == myUniqueName }) else { return false }
+            // Only consider it overdue if: assigned to me + overdue + I haven't approved it
+            return !me.isApproved && pr.isOverdue
+        }.count > 0
+        
+        // Calculate authored PRs statistics
+        let authoredPRs = authoredPullRequests.filter { pr in
             pr.createdBy.uniqueName == myUniqueName
         }
-        let open = openPRs.count
-        let approved = openPRs.filter { pr in
+        let totalAuthored = authoredPRs.count
+        let authoredApproved = authoredPRs.filter { pr in
             pr.isApproved
         }.count
-        updateMenuBar(assigned: assigned, approved: approved, open: open)
+        
+        updateMenuBar(assigned: assigned, approved: 0, open: 0, notApproved: notApproved, hasOverdue: hasOverdue, authoredApproved: authoredApproved, totalAuthored: totalAuthored)
     }
 
     func buildMenu() {

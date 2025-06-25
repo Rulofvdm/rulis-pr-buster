@@ -136,6 +136,12 @@ extension PullRequest {
         approvalCount >= 2
     }
     
+    var isOverdue: Bool {
+        // Check if PR is older than 24 hours
+        let twentyFourHoursAgo = Date().addingTimeInterval(-24 * 60 * 60)
+        return creationDate < twentyFourHoursAgo
+    }
+    
     var webURL: URL? {
         let org = SettingsManager.shared.organization
         let proj = SettingsManager.shared.project
@@ -150,6 +156,9 @@ extension PullRequest {
         let approval = me.isApproved ? "✓" : "Ⅹ"
         let approvalColor = me.isApproved ? "green" : "red"
         
+        // Only mark as overdue if: assigned to me + overdue + I haven't approved it
+        let shouldShowAsOverdue = !me.isApproved && isOverdue
+        
         return PRMenuItemData(
             approval: approval,
             approvalColor: approvalColor,
@@ -158,7 +167,8 @@ extension PullRequest {
             author: createdBy.displayName,
             branch: shortTargetBranch,
             reviewersStatus: nil,
-            url: webURL ?? URL(string: "https://dev.azure.com")!
+            url: webURL ?? URL(string: "https://dev.azure.com")!,
+            isOverdue: shouldShowAsOverdue
         )
     }
     
@@ -180,7 +190,8 @@ extension PullRequest {
             author: createdBy.displayName,
             branch: shortTargetBranch,
             reviewersStatus: reviewersStatus,
-            url: webURL ?? URL(string: "https://dev.azure.com")!
+            url: webURL ?? URL(string: "https://dev.azure.com")!,
+            isOverdue: false // Authored PRs should never show as overdue
         )
     }
 }
