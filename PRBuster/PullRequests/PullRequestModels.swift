@@ -149,7 +149,7 @@ extension PullRequest {
     }
     
     // Convert to menu item data for assigned PRs
-    func toAssignedMenuItemData(myUniqueName: String) -> PRMenuItemData? {
+    func toAssignedMenuItemData(myUniqueName: String, showShortTitles: Bool = false) -> PRMenuItemData? {
         guard let me = reviewers.first(where: { $0.uniqueName == myUniqueName }) else { return nil }
         
         let reviewerType: PRMenuItemData.ReviewerType = me.isRequired ?? false ? .required : .optional
@@ -159,21 +159,25 @@ extension PullRequest {
         // Only mark as overdue if: assigned to me + overdue + I haven't approved it
         let shouldShowAsOverdue = !me.isApproved && isOverdue
         
+        // Truncate title if setting is enabled
+        let displayTitle = showShortTitles && title.count > 8 ? String(title.prefix(8)) + "..." : title
+        
         return PRMenuItemData(
             approval: approval,
             approvalColor: approvalColor,
             reviewerType: reviewerType,
-            title: title,
+            title: displayTitle,
             author: createdBy.displayName,
             branch: shortTargetBranch,
             reviewersStatus: nil,
             url: webURL ?? URL(string: "https://dev.azure.com")!,
-            isOverdue: shouldShowAsOverdue
+            isOverdue: shouldShowAsOverdue,
+            projectName: repository.name
         )
     }
     
     // Convert to menu item data for authored PRs
-    func toAuthoredMenuItemData() -> PRMenuItemData {
+    func toAuthoredMenuItemData(showShortTitles: Bool = false) -> PRMenuItemData {
         let approval = "\(approvalCount) ✓"
         let approvalColor = isApproved ? "green" : "red"
         
@@ -182,16 +186,20 @@ extension PullRequest {
             return "\(reviewer.displayName) \(status)"
         }.joined(separator: " ")
         
+        // Truncate title if setting is enabled
+        let displayTitle = showShortTitles && title.count > 8 ? String(title.prefix(8)) + "..." : title
+        
         return PRMenuItemData(
             approval: approval,
             approvalColor: approvalColor,
             reviewerType: .author,
-            title: title,
+            title: displayTitle,
             author: createdBy.displayName,
             branch: shortTargetBranch,
             reviewersStatus: reviewersStatus,
             url: webURL ?? URL(string: "https://dev.azure.com")!,
-            isOverdue: false // Authored PRs should never show as overdue
+            isOverdue: false, // Authored PRs should never show as overdue
+            projectName: repository.name
         )
     }
 }

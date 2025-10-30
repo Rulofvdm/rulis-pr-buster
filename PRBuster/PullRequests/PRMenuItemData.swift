@@ -10,6 +10,7 @@ struct PRMenuItemData {
     let reviewersStatus: String?
     let url: URL
     let isOverdue: Bool
+    let projectName: String
     
     enum ReviewerType: String {
         case required = "R"

@@ -8,6 +8,7 @@ class PRMenuItemView: NSView {
     private let branchLabel = NSTextField(labelWithString: "")
     private let reviewersStatusLabel = NSTextField(labelWithString: "")
     private let unresolvedLabel = NSTextField(labelWithString: "")
+    private let projectLabel = NSTextField(labelWithString: "")
     private var onClick: (() -> Void)?
     private var isHovered: Bool = false {
         didSet { needsDisplay = true }
@@ -40,11 +41,12 @@ class PRMenuItemView: NSView {
             reviewersStatus: data.reviewersStatus,
             url: data.url,
             isOverdue: data.isOverdue,
+            projectName: data.projectName,
             onClick: onClick
         )
     }
 
-    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, isOverdue: Bool = false, onClick: (() -> Void)? = nil) {
+    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, isOverdue: Bool = false, projectName: String = "", onClick: (() -> Void)? = nil) {
         self.url = url
         super.init(frame: .zero)
         self.onClick = onClick
@@ -124,7 +126,17 @@ class PRMenuItemView: NSView {
         unresolvedLabel.isHidden = true
         unresolvedLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        let stack = NSStackView(views: [statusLabel, reviewerTypeLabel, titleLabel, unresolvedLabel, authorLabel, branchLabel, reviewersStatusLabel])
+        projectLabel.stringValue = "[\(projectName)]"
+        projectLabel.font = .systemFont(ofSize: 11, weight: .medium)
+        projectLabel.textColor = .tertiaryLabelColor
+        projectLabel.backgroundColor = .clear
+        projectLabel.isBordered = false
+        projectLabel.isEditable = false
+        projectLabel.lineBreakMode = .byTruncatingTail
+        projectLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        projectLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let stack = NSStackView(views: [statusLabel, reviewerTypeLabel, titleLabel, unresolvedLabel, authorLabel, branchLabel, projectLabel, reviewersStatusLabel])
         stack.orientation = .horizontal
         stack.spacing = 8
         stack.alignment = .centerY
@@ -179,7 +191,7 @@ class PRMenuItemView: NSView {
 
     private func updateUnresolvedLabel() {
         if unresolvedCommentsCount > 0 {
-            unresolvedLabel.stringValue = "\(unresolvedCommentsCount) unresolved"
+            unresolvedLabel.stringValue = "\(unresolvedCommentsCount) unresolved comment(s)"
             unresolvedLabel.isHidden = false
         } else {
             unresolvedLabel.isHidden = true

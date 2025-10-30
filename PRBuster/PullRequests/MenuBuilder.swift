@@ -52,7 +52,7 @@ class MenuBuilder {
                 openAllAssignedItem.target = MenuBuilder.shared
                 menu.addItem(openAllAssignedItem)
                 for pr in pullRequests {
-                    guard let menuData = pr.toAssignedMenuItemData(myUniqueName: myUniqueName) else { continue }
+                    guard let menuData = pr.toAssignedMenuItemData(myUniqueName: myUniqueName, showShortTitles: settingsManager.showShortTitles) else { continue }
                     let prView = PRMenuItemView(data: menuData) {
                         NSWorkspace.shared.open(menuData.url)
                     }
@@ -83,7 +83,7 @@ class MenuBuilder {
                 openAllAuthoredItem.target = MenuBuilder.shared
                 menu.addItem(openAllAuthoredItem)
                 for pr in authoredPRs {
-                    let menuData = pr.toAuthoredMenuItemData()
+                    let menuData = pr.toAuthoredMenuItemData(showShortTitles: settingsManager.showShortTitles)
                     let prView = PRMenuItemView(data: menuData) {
                         NSWorkspace.shared.open(menuData.url)
                     }
@@ -145,7 +145,7 @@ class MenuBuilder {
         }
         
         if urls.isEmpty, let appDelegate = NSApp.delegate as? AppDelegate {
-            // Fallback: open all assigned PRs from the data
+            // Fallback: open all assigned PRs from the data (pullRequests contains only assigned PRs)
             for pr in appDelegate.pullRequests {
                 if let url = pr.webURL {
                     NSWorkspace.shared.open(url)

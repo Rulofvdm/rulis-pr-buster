@@ -1,5 +1,9 @@
 import Foundation
 
+extension Notification.Name {
+    static let patExpired = Notification.Name("patExpired")
+}
+
 class PullRequestService {
     static func fetchAssignedPRs(email: String, pat: String, completion: @escaping ([PullRequest]) -> Void) {
         guard !pat.isEmpty else {
@@ -20,6 +24,18 @@ class PullRequestService {
         request.setValue(authValue, forHTTPHeaderField: "Authorization")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            // Check for HTTP status code
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                    // Authentication failed - PAT expired or invalid
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .patExpired, object: nil)
+                    }
+                    completion([])
+                    return
+                }
+            }
+            
             guard let data = data else {
                 completion([])
                 return
@@ -60,6 +76,18 @@ class PullRequestService {
         request.setValue(authValue, forHTTPHeaderField: "Authorization")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            // Check for HTTP status code
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                    // Authentication failed - PAT expired or invalid
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .patExpired, object: nil)
+                    }
+                    completion([])
+                    return
+                }
+            }
+            
             guard let data = data else {
                 completion([])
                 return

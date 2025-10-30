@@ -6,11 +6,27 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		E837104D2EAB75D1006B9B67 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E88B37152E095465003B6964 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E88B371C2E095465003B6964;
+			remoteInfo = PRBuster;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		E83710492EAB75D1006B9B67 /* PRBusterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PRBusterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E88B371D2E095465003B6964 /* PRBuster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PRBuster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		E837104A2EAB75D1006B9B67 /* PRBusterTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PRBusterTests;
+			sourceTree = "<group>";
+		};
 		E88B371F2E095465003B6964 /* PRBuster */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = PRBuster;
@@ -19,6 +35,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E83710462EAB75D1006B9B67 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E88B371A2E095465003B6964 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				E88B371F2E095465003B6964 /* PRBuster */,
+				E837104A2EAB75D1006B9B67 /* PRBusterTests */,
 				E88B371E2E095465003B6964 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				E88B371D2E095465003B6964 /* PRBuster.app */,
+				E83710492EAB75D1006B9B67 /* PRBusterTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +73,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E83710482EAB75D1006B9B67 /* PRBusterTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E83710512EAB75D1006B9B67 /* Build configuration list for PBXNativeTarget "PRBusterTests" */;
+			buildPhases = (
+				E83710452EAB75D1006B9B67 /* Sources */,
+				E83710462EAB75D1006B9B67 /* Frameworks */,
+				E83710472EAB75D1006B9B67 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E837104E2EAB75D1006B9B67 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E837104A2EAB75D1006B9B67 /* PRBusterTests */,
+			);
+			name = PRBusterTests;
+			packageProductDependencies = (
+			);
+			productName = PRBusterTests;
+			productReference = E83710492EAB75D1006B9B67 /* PRBusterTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		E88B371C2E095465003B6964 /* PRBuster */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E88B37292E095468003B6964 /* Build configuration list for PBXNativeTarget "PRBuster" */;
@@ -77,9 +125,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					E83710482EAB75D1006B9B67 = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = E88B371C2E095465003B6964;
+					};
 					E88B371C2E095465003B6964 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -100,11 +152,19 @@
 			projectRoot = "";
 			targets = (
 				E88B371C2E095465003B6964 /* PRBuster */,
+				E83710482EAB75D1006B9B67 /* PRBusterTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E83710472EAB75D1006B9B67 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E88B371B2E095465003B6964 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +175,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E83710452EAB75D1006B9B67 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E88B37192E095465003B6964 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +191,65 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E837104E2EAB75D1006B9B67 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E88B371C2E095465003B6964 /* PRBuster */;
+			targetProxy = E837104D2EAB75D1006B9B67 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		E837104F2EAB75D1006B9B67 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ruli.PRBusterTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PRBuster.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PRBuster";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		E83710502EAB75D1006B9B67 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ruli.PRBusterTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PRBuster.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PRBuster";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 		E88B37272E095468003B6964 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -246,6 +371,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = PRBuster/PRBuster.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
@@ -286,6 +412,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = PRBuster/PRBusterRelease.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -326,6 +453,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E83710512EAB75D1006B9B67 /* Build configuration list for PBXNativeTarget "PRBusterTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E837104F2EAB75D1006B9B67 /* Debug */,
+				E83710502EAB75D1006B9B67 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E88B37182E095465003B6964 /* Build configuration list for PBXProject "PRBuster" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

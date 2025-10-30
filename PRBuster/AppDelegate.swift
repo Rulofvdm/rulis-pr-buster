@@ -15,8 +15,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var errorMessage: String? = nil
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Ensure app doesn't appear in dock
+        NSApp.setActivationPolicy(.accessory)
+        
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = notificationManager
+        
+        // Listen for PAT expiration notifications
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handlePATExpired),
+            name: .patExpired,
+            object: nil
+        )
         
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         updateMenuBar(assigned: 0, approved: 0, open: 0, notApproved: 0, hasOverdue: false, authoredApproved: 0, totalAuthored: 0)
@@ -224,5 +235,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func getPendingPRCount() -> Int {
         return pullRequests.count
+    }
+    
+    @objc private func handlePATExpired() {
+        let organization = settingsManager.organization
+        let renewURL = "https://dev.azure.com/\(organization)/_usersSettings/tokens"
+        
+        errorMessage = """
+        PAT/Token has expired or is invalid.
+        
+        Please renew your token:
+        \(renewURL)
+        
+        Required permissions:
+        • Code → Read
+        • Work Items → Read
+        """
+        
+        buildMenu()
     }
 }

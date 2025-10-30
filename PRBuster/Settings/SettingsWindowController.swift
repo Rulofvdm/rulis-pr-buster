@@ -5,11 +5,14 @@ class SettingsWindowController: NSWindowController {
     let showAuthoredCheckbox = NSButton(checkboxWithTitle: "Show PRs I authored", target: nil, action: nil)
     let showAssignedCheckbox = NSButton(checkboxWithTitle: "Show PRs assigned to me", target: nil, action: nil)
     let autoRefreshCheckbox = NSButton(checkboxWithTitle: "Enable auto-refresh", target: nil, action: nil)
+    let showShortTitlesCheckbox = NSButton(checkboxWithTitle: "Show only first 8 characters of titles", target: nil, action: nil)
     let refreshIntervalField = NSTextField(string: "")
     let emailField = NSTextField(string: "")
     let organizationField = NSTextField(string: "")
     let projectField = NSTextField(string: "")
     let patField = PasteableSecureTextField(string: "")
+    let tokenValidationIcon = NSImageView()
+    let tokenValidationTooltip = NSTextField(labelWithString: "")
     
     // Notification controls
     let notificationsEnabledCheckbox = NSButton(checkboxWithTitle: "Enable notifications", target: nil, action: nil)
@@ -70,11 +73,12 @@ class SettingsWindowController: NSWindowController {
         projRow.spacing = 8
         projRow.alignment = .firstBaseline
         credentialsStack.addArrangedSubview(projRow)
-        let patRow = NSStackView(views: [NSTextField(labelWithString: "PAT/token:"), patField])
-        patRow.orientation = .horizontal
-        patRow.spacing = 8
-        patRow.alignment = .firstBaseline
-        credentialsStack.addArrangedSubview(patRow)
+        // Token validation section - icon next to PAT field
+        let patRowWithValidation = NSStackView(views: [NSTextField(labelWithString: "PAT/token:"), patField, tokenValidationIcon])
+        patRowWithValidation.orientation = .horizontal
+        patRowWithValidation.spacing = 8
+        patRowWithValidation.alignment = .firstBaseline
+        credentialsStack.addArrangedSubview(patRowWithValidation)
         mainStack.addArrangedSubview(credentialsStack)
         
         // --- Display Section ---
@@ -88,6 +92,7 @@ class SettingsWindowController: NSWindowController {
         displayStack.addArrangedSubview(showAuthoredCheckbox)
         displayStack.addArrangedSubview(showAssignedCheckbox)
         displayStack.addArrangedSubview(autoRefreshCheckbox)
+        displayStack.addArrangedSubview(showShortTitlesCheckbox)
         let refreshRow = NSStackView(views: [NSTextField(labelWithString: "Refresh interval (minutes):"), refreshIntervalField])
         refreshRow.orientation = .horizontal
         refreshRow.spacing = 8
@@ -129,6 +134,7 @@ class SettingsWindowController: NSWindowController {
         showAuthoredCheckbox.state = settingsManager.showAuthoredPRs ? .on : .off
         showAssignedCheckbox.state = settingsManager.showAssignedPRs ? .on : .off
         autoRefreshCheckbox.state = settingsManager.autoRefreshEnabled ? .on : .off
+        showShortTitlesCheckbox.state = settingsManager.showShortTitles ? .on : .off
         refreshIntervalField.stringValue = "\(settingsManager.refreshInterval / 60)"
         notificationsEnabledCheckbox.state = settingsManager.notificationsEnabled ? .on : .off
         newPRNotificationsCheckbox.state = settingsManager.newPRNotifications ? .on : .off
@@ -154,6 +160,8 @@ class SettingsWindowController: NSWindowController {
         showAssignedCheckbox.action = #selector(toggleChanged)
         autoRefreshCheckbox.target = self
         autoRefreshCheckbox.action = #selector(toggleChanged)
+        showShortTitlesCheckbox.target = self
+        showShortTitlesCheckbox.action = #selector(toggleChanged)
         refreshIntervalField.target = self
         refreshIntervalField.action = #selector(textFieldChanged)
         notificationsEnabledCheckbox.target = self
@@ -172,6 +180,9 @@ class SettingsWindowController: NSWindowController {
         dailyReminderTimePicker.action = #selector(timePickerChanged)
         intervalHoursField.target = self
         intervalHoursField.action = #selector(intervalHoursChanged)
+        
+        // --- Setup token validation icon ---
+        setupTokenValidationIcon()
         
         // --- Enable/disable fields ---
         refreshIntervalField.isEnabled = autoRefreshCheckbox.state == .on
@@ -215,6 +226,7 @@ class SettingsWindowController: NSWindowController {
         settingsManager.showAuthoredPRs = showAuthoredCheckbox.state == .on
         settingsManager.showAssignedPRs = showAssignedCheckbox.state == .on
         settingsManager.autoRefreshEnabled = autoRefreshCheckbox.state == .on
+        settingsManager.showShortTitles = showShortTitlesCheckbox.state == .on
         refreshIntervalField.isEnabled = autoRefreshCheckbox.state == .on
         (NSApp.delegate as? AppDelegate)?.buildMenu()
         (NSApp.delegate as? AppDelegate)?.startRefreshTimer()
@@ -281,6 +293,183 @@ class SettingsWindowController: NSWindowController {
     override func cancelOperation(_ sender: Any?) {
         self.close()
     }
+    
+    private func setupTokenValidationIcon() {
+        // Configure the validation icon
+        tokenValidationIcon.frame = NSRect(x: 0, y: 0, width: 16, height: 16)
+        tokenValidationIcon.imageScaling = .scaleProportionallyUpOrDown
+        
+        // Start with neutral state
+        setTokenValidationState(.neutral)
+        
+        // Set up real-time validation
+        patField.target = self
+        patField.action = #selector(patFieldChanged)
+    }
+    
+    @objc private func patFieldChanged() {
+        // Debounce the validation to avoid too many API calls
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(validateTokenRealTime), object: nil)
+        perform(#selector(validateTokenRealTime), with: nil, afterDelay: 1.0)
+    }
+    
+    @objc private func validateTokenRealTime() {
+        let currentPAT = patField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Don't validate empty tokens
+        if currentPAT.isEmpty {
+            setTokenValidationState(.neutral)
+            return
+        }
+        
+        // Don't validate obviously invalid tokens (too short, not base64-like, etc.)
+        if currentPAT.count < 10 {
+            setTokenValidationState(.invalid, message: "Token is too short. Azure DevOps PATs are typically 52+ characters long. Please check if you copied the complete token.")
+            return
+        }
+        
+        if !isValidPATFormat(currentPAT) {
+            setTokenValidationState(.invalid, message: "Token format appears invalid. Azure DevOps PATs should contain only letters, numbers, and the characters +/= (base64-like format). Please verify you copied the token correctly.")
+            return
+        }
+        
+        // Show loading state
+        setTokenValidationState(.loading)
+        
+        // Update settings with current values
+        settingsManager.azureEmail = emailField.stringValue
+        settingsManager.organization = organizationField.stringValue
+        settingsManager.project = projectField.stringValue
+        settingsManager.azurePAT = currentPAT
+        
+        // Test the token with a more robust validation
+        validateTokenWithAPI()
+    }
+    
+    private func isValidPATFormat(_ pat: String) -> Bool {
+        // Basic format validation - Azure DevOps PATs are typically base64-like
+        // They should be at least 52 characters and contain valid base64 characters
+        return pat.count >= 52 && pat.range(of: "^[A-Za-z0-9+/=]+$", options: .regularExpression) != nil
+    }
+    
+    private func validateTokenWithAPI() {
+        // Use a more specific API endpoint for validation
+        let organization = settingsManager.organization
+        let project = settingsManager.project
+        let pat = settingsManager.azurePAT
+        
+        guard !organization.isEmpty && !project.isEmpty && !pat.isEmpty else {
+            setTokenValidationState(.invalid, message: "Cannot validate token: Missing organization or project name. Please fill in both the 'Organization' and 'Project' fields before validating the token.")
+            return
+        }
+        
+        // Use a lightweight API call to validate the token - use the organization API which is more reliable
+        let urlString = "https://dev.azure.com/\(organization)/_apis/projects?api-version=7.1-preview.1"
+        guard let url = URL(string: urlString) else {
+            setTokenValidationState(.invalid, message: "Invalid URL format. This usually means the organization or project name contains invalid characters. Please check that your organization and project names are correct and don't contain special characters.")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        let authStr = ":\(pat)"
+        let authData = authStr.data(using: .utf8)!
+        let authValue = "Basic \(authData.base64EncodedString())"
+        request.setValue(authValue, forHTTPHeaderField: "Authorization")
+        
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    switch httpResponse.statusCode {
+                    case 200:
+                        self.setTokenValidationState(.valid)
+                    case 401:
+                        self.setTokenValidationState(.invalid, message: "Authentication failed (401 Unauthorized): The token is invalid, expired, or doesn't have the required permissions. Please check that: 1) The token is correct and complete, 2) The token hasn't expired, 3) The token has 'Code (read)' and 'Work items (read)' permissions enabled.")
+                    case 403:
+                        self.setTokenValidationState(.invalid, message: "Access forbidden (403): The token is valid but doesn't have permission to access this project. Please ensure the token has 'Code (read)' and 'Work items (read)' permissions, and that you have access to the specified project.")
+                    case 404:
+                        self.setTokenValidationState(.invalid, message: "Project not found (404): The project '\(self.settingsManager.project)' doesn't exist in organization '\(self.settingsManager.organization)'. Please verify that both the organization and project names are spelled correctly.")
+                    default:
+                        self.setTokenValidationState(.invalid, message: "Authentication failed (HTTP \(httpResponse.statusCode)): The server returned an unexpected response. This might indicate a temporary issue with Azure DevOps or an incorrect organization/project configuration.")
+                    }
+                } else if let error = error {
+                    self.setTokenValidationState(.invalid, message: "Network error: \(error.localizedDescription). Please check your internet connection and try again. If the problem persists, Azure DevOps might be temporarily unavailable.")
+                } else {
+                    self.setTokenValidationState(.invalid, message: "Unknown error: The validation request failed for an unknown reason. Please try again in a few moments.")
+                }
+            }
+        }
+        
+        task.resume()
+        
+        // Set up timeout
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+            guard let self = self else { return }
+            if case .loading = self.currentValidationState {
+                self.setTokenValidationState(.invalid, message: "Request timeout: The validation request took too long to complete. This could be due to: 1) Slow internet connection, 2) Azure DevOps being temporarily unavailable, 3) Network firewall blocking the request. Please check your internet connection and try again.")
+            }
+        }
+    }
+    
+    private enum TokenValidationState {
+        case neutral, loading, valid, invalid
+    }
+    
+    private var currentValidationState: TokenValidationState = .neutral
+    
+    private func setTokenValidationState(_ state: TokenValidationState, message: String = "") {
+        currentValidationState = state
+        
+        switch state {
+        case .neutral:
+            tokenValidationIcon.image = nil
+            tokenValidationIcon.toolTip = ""
+            
+        case .loading:
+            // Create a simple loading indicator
+            let loadingImage = NSImage(size: NSSize(width: 16, height: 16))
+            loadingImage.lockFocus()
+            NSColor.systemBlue.set()
+            NSBezierPath(ovalIn: NSRect(x: 2, y: 2, width: 12, height: 12)).stroke()
+            loadingImage.unlockFocus()
+            tokenValidationIcon.image = loadingImage
+            tokenValidationIcon.toolTip = "Validating token with Azure DevOps..."
+            
+        case .valid:
+            // Green checkmark
+            let checkImage = NSImage(size: NSSize(width: 16, height: 16))
+            checkImage.lockFocus()
+            NSColor.systemGreen.set()
+            let path = NSBezierPath()
+            path.move(to: NSPoint(x: 4, y: 8))
+            path.line(to: NSPoint(x: 7, y: 11))
+            path.line(to: NSPoint(x: 12, y: 4))
+            path.lineWidth = 2
+            path.stroke()
+            checkImage.unlockFocus()
+            tokenValidationIcon.image = checkImage
+            tokenValidationIcon.toolTip = "✅ Token is valid and working correctly!"
+            
+        case .invalid:
+            // Red X
+            let xImage = NSImage(size: NSSize(width: 16, height: 16))
+            xImage.lockFocus()
+            NSColor.systemRed.set()
+            let path = NSBezierPath()
+            path.move(to: NSPoint(x: 4, y: 4))
+            path.line(to: NSPoint(x: 12, y: 12))
+            path.move(to: NSPoint(x: 12, y: 4))
+            path.line(to: NSPoint(x: 4, y: 12))
+            path.lineWidth = 2
+            path.stroke()
+            xImage.unlockFocus()
+            tokenValidationIcon.image = xImage
+            let tooltipMessage = message.isEmpty ? "❌ Token is invalid" : "❌ " + message
+            tokenValidationIcon.toolTip = tooltipMessage
+        }
+    }
+    
 }
 
 extension SettingsWindowController: NSWindowDelegate {
@@ -288,6 +477,7 @@ extension SettingsWindowController: NSWindowDelegate {
         settingsManager.showAuthoredPRs = showAuthoredCheckbox.state == .on
         settingsManager.showAssignedPRs = showAssignedCheckbox.state == .on
         settingsManager.autoRefreshEnabled = autoRefreshCheckbox.state == .on
+        settingsManager.showShortTitles = showShortTitlesCheckbox.state == .on
         if let intervalMinutes = Int(refreshIntervalField.stringValue) {
             settingsManager.refreshInterval = intervalMinutes * 60
         }

@@ -102,6 +102,11 @@ class SettingsManager: ObservableObject {
         set { settings.project = newValue }
     }
     
+    var showShortTitles: Bool {
+        get { settings.showShortTitles }
+        set { settings.showShortTitles = newValue }
+    }
+    
     var isConfigured: Bool {
         !settings.azureEmail.isEmpty && !settings.azurePAT.isEmpty
     }
@@ -128,7 +133,8 @@ class SettingsManager: ObservableObject {
                 smartNotifications: userDefaults.object(forKey: "smartNotifications") as? Bool ?? true,
                 includePRCount: userDefaults.object(forKey: "includePRCount") as? Bool ?? true,
                 organization: userDefaults.string(forKey: "organization") ?? "jobjack",
-                project: userDefaults.string(forKey: "project") ?? "Platform"
+                project: userDefaults.string(forKey: "project") ?? "Platform",
+                showShortTitles: userDefaults.object(forKey: "showShortTitles") as? Bool ?? false
             )
         }
         return settings
@@ -148,6 +154,7 @@ class SettingsManager: ObservableObject {
             userDefaults.set(settings.autoRefreshEnabled, forKey: "autoRefreshEnabled")
             userDefaults.set(settings.organization, forKey: "organization")
             userDefaults.set(settings.project, forKey: "project")
+            userDefaults.set(settings.showShortTitles, forKey: "showShortTitles")
             
             userDefaults.synchronize()
         } catch {

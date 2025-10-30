@@ -9,6 +9,13 @@ class PasteableSecureTextField: NSSecureTextField {
                 return true
             }
         }
+        
+        // Command+A (Select All)
+        if event.type == .keyDown && event.modifierFlags.contains(.command) && event.characters == "a" {
+            self.selectText(nil)
+            return true
+        }
+        
         return super.performKeyEquivalent(with: event)
     }
 } 

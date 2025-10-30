@@ -22,6 +22,9 @@ struct AppSettings: Codable {
     var organization: String
     var project: String
     
+    // Display settings
+    var showShortTitles: Bool // Show only first 8 characters of PR titles
+    
     static let `default` = AppSettings(
         azureEmail: "",
         azurePAT: "",
@@ -38,6 +41,7 @@ struct AppSettings: Codable {
         smartNotifications: true,
         includePRCount: true,
         organization: "jobjack", // Default value
-        project: "Platform"      // Default value
+        project: "Platform",    // Default value
+        showShortTitles: false  // Default to showing full titles
     )
 } 
