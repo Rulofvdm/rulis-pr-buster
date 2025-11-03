@@ -157,3 +157,4 @@ struct AppSettings: Codable {
 - **Daily Reminder Time**: 9:00 AM
 - **Interval Hours**: 4 hours
 
+

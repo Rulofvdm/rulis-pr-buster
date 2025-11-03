@@ -122,6 +122,13 @@ enum ProjectVisibility: String, Codable {
     }
 }
 
+enum ReviewersPolicyState {
+    case queued
+    case approved
+    case rejected
+    case unknown
+}
+
 // MARK: - Extensions for Convenience
 extension PullRequest {
     var shortTargetBranch: String {
@@ -156,11 +163,10 @@ extension PullRequest {
         let approval = me.isApproved ? "✓" : "Ⅹ"
         let approvalColor = me.isApproved ? "green" : "red"
         
-        // Only mark as overdue if: assigned to me + overdue + I haven't approved it
         let shouldShowAsOverdue = !me.isApproved && isOverdue
-        
-        // Truncate title if setting is enabled
         let displayTitle = showShortTitles && title.count > 8 ? String(title.prefix(8)) + "..." : title
+        // Unified status
+        let (statusText, statusColor) = unifiedStatus.display
         
         return PRMenuItemData(
             approval: approval,
@@ -172,7 +178,9 @@ extension PullRequest {
             reviewersStatus: nil,
             url: webURL ?? URL(string: "https://dev.azure.com")!,
             isOverdue: shouldShowAsOverdue,
-            projectName: repository.name
+            projectName: repository.name,
+            statusText: statusText,
+            statusColor: statusColor
         )
     }
     
@@ -186,8 +194,8 @@ extension PullRequest {
             return "\(reviewer.displayName) \(status)"
         }.joined(separator: " ")
         
-        // Truncate title if setting is enabled
         let displayTitle = showShortTitles && title.count > 8 ? String(title.prefix(8)) + "..." : title
+        let (statusText, statusColor) = unifiedStatus.display
         
         return PRMenuItemData(
             approval: approval,
@@ -199,7 +207,9 @@ extension PullRequest {
             reviewersStatus: reviewersStatus,
             url: webURL ?? URL(string: "https://dev.azure.com")!,
             isOverdue: false, // Authored PRs should never show as overdue
-            projectName: repository.name
+            projectName: repository.name,
+            statusText: statusText,
+            statusColor: statusColor
         )
     }
 }
@@ -232,5 +242,65 @@ extension PullRequest {
         
         let creationDateString = try container.decode(String.self, forKey: .creationDate)
         creationDate = dateFormatter.date(from: creationDateString) ?? Date()
+    }
+} 
+
+extension PullRequest {
+    enum PRUnifiedStatus {
+        case buildFailed
+        case buildExpired
+        case unresolvedComments
+        case checksRunning
+        case waitingForApproval
+        case waitingForReapproval
+        case ready
+        
+        var display: (text: String, color: String) {
+            switch self {
+            case .buildFailed: return ("Build failed", "red")
+            case .buildExpired: return ("Build validation expired", "red")
+            case .unresolvedComments: return ("Unresolved comments", "red")
+            case .checksRunning: return ("Checks running", "blue")
+            case .waitingForApproval: return ("Waiting for approval", "orange")
+            case .waitingForReapproval: return ("Waiting for reapproval", "orange")
+            case .ready: return ("Ready", "green")
+            }
+        }
+    }
+    // Storage for supplementary async-fetched UI metadata
+    private struct Associated {
+        static var buildState = [Int: PRStatusCheck.State]()
+        static var unresolvedCommentCount = [Int: Int]()
+        static var checksRunning = [Int: Bool]()
+    }
+    // Convenience properties to store fetched status per PR instance
+    var buildValidationState: PRStatusCheck.State? {
+        get { Self.Associated.buildState[pullRequestId] }
+        set { Self.Associated.buildState[pullRequestId] = newValue }
+    }
+    var unresolvedCommentCount: Int? {
+        get { Self.Associated.unresolvedCommentCount[pullRequestId] }
+        set { Self.Associated.unresolvedCommentCount[pullRequestId] = newValue }
+    }
+    var isAnyCheckRunning: Bool? {
+        get { Self.Associated.checksRunning[pullRequestId] }
+        set { Self.Associated.checksRunning[pullRequestId] = newValue }
+    }
+    /// Compute single unified status based on fetched/check logic and precedence order.
+    var unifiedStatus: PRUnifiedStatus {
+        // 1. Build validation failed (error/failed overrides)
+        if let bs = buildValidationState, bs == .failed || bs == .error {
+            return .buildFailed
+        }
+        // 2. Unresolved comments (if set and greater than 0)
+        if let comments = unresolvedCommentCount, comments > 0 {
+            return .unresolvedComments
+        }
+        // 3. Running checks
+        if let running = isAnyCheckRunning, running {
+            return .checksRunning
+        }
+        // 4. Else ready
+        return .ready
     }
 } 

@@ -19,10 +19,11 @@ class PRMenuItemView: NSView {
         }
     }
     public let url: URL
+    private var statusIndicator: NSTextField? = nil
 
     override var acceptsFirstResponder: Bool { true }
 
-    // Convenience initializer for use with PRMenuItemData
+    // Modified: accept statusText and statusColor
     convenience init(data: PRMenuItemData, onClick: (() -> Void)? = nil) {
         self.init(
             approval: data.approval,
@@ -31,6 +32,7 @@ class PRMenuItemView: NSView {
                 case "green": return .systemGreen
                 case "red": return .systemRed
                 case "orange": return .systemOrange
+                case "blue": return .systemBlue
                 default: return .secondaryLabelColor
                 }
             }(),
@@ -42,11 +44,13 @@ class PRMenuItemView: NSView {
             url: data.url,
             isOverdue: data.isOverdue,
             projectName: data.projectName,
+            statusText: data.statusText,
+            statusColor: data.statusColor,
             onClick: onClick
         )
     }
 
-    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, isOverdue: Bool = false, projectName: String = "", onClick: (() -> Void)? = nil) {
+    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, isOverdue: Bool = false, projectName: String = "", statusText: String, statusColor: String, onClick: (() -> Void)? = nil) {
         self.url = url
         super.init(frame: .zero)
         self.onClick = onClick
@@ -55,6 +59,25 @@ class PRMenuItemView: NSView {
 
         // Monospaced font for alignment
         let monoFont = NSFont.monospacedSystemFont(ofSize: 16, weight: .bold)
+
+        // Status indicator at the lead
+        let statusIndicatorField = NSTextField(labelWithString: statusText)
+        statusIndicatorField.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+        statusIndicatorField.textColor = {
+            switch statusColor {
+            case "red": return .systemRed
+            case "green": return .systemGreen
+            case "blue": return .systemBlue
+            case "orange": return .systemOrange
+            default: return .secondaryLabelColor
+            }
+        }()
+        statusIndicatorField.backgroundColor = .clear
+        statusIndicatorField.isBordered = false
+        statusIndicatorField.isEditable = false
+        statusIndicatorField.translatesAutoresizingMaskIntoConstraints = false
+        self.statusIndicator = statusIndicatorField
+
         statusLabel.stringValue = approval
         statusLabel.textColor = approvalColor
         statusLabel.font = monoFont
@@ -63,7 +86,7 @@ class PRMenuItemView: NSView {
         statusLabel.isBordered = false
         statusLabel.isEditable = false
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
-
+        
         if reviewerType != "A" {
             reviewerTypeLabel.stringValue = reviewerType
             reviewerTypeLabel.textColor = .secondaryLabelColor
@@ -136,12 +159,12 @@ class PRMenuItemView: NSView {
         projectLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
         projectLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        let stack = NSStackView(views: [statusLabel, reviewerTypeLabel, titleLabel, unresolvedLabel, authorLabel, branchLabel, projectLabel, reviewersStatusLabel])
+        // Adjust stack view order: titleLabel, statusIndicatorField, branch, ...
+        let stack = NSStackView(views: [statusLabel, reviewerTypeLabel, titleLabel, statusIndicatorField, authorLabel, branchLabel, projectLabel, reviewersStatusLabel])
         stack.orientation = .horizontal
         stack.spacing = 8
         stack.alignment = .centerY
         stack.translatesAutoresizingMaskIntoConstraints = false
-
         addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
@@ -195,6 +218,18 @@ class PRMenuItemView: NSView {
             unresolvedLabel.isHidden = false
         } else {
             unresolvedLabel.isHidden = true
+        }
+    }
+
+    public func updateStatus(text: String, color: String) {
+        guard let label = self.statusIndicator else { return }
+        label.stringValue = text
+        switch color {
+        case "red": label.textColor = .systemRed
+        case "green": label.textColor = .systemGreen
+        case "blue": label.textColor = .systemBlue
+        case "orange": label.textColor = .systemOrange
+        default: label.textColor = .secondaryLabelColor
         }
     }
 } 

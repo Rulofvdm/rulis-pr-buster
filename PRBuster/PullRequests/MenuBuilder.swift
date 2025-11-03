@@ -15,6 +15,11 @@ class MenuBuilder {
         let myUniqueName = settingsManager.azureEmail
         let showAuthored = settingsManager.showAuthoredPRs
         let showAssigned = settingsManager.showAssignedPRs
+        // Prepare dictionaries for view models and views
+        var assignedViewModels = [Int: PRMenuItemViewModel]()
+        var assignedViews = [Int: PRMenuItemView]()
+        var authoredViewModels = [Int: PRMenuItemViewModel]()
+        var authoredViews = [Int: PRMenuItemView]()
         
         // Show error message if present
         if let errorMessage = errorMessage {
@@ -53,14 +58,60 @@ class MenuBuilder {
                 menu.addItem(openAllAssignedItem)
                 for pr in pullRequests {
                     guard let menuData = pr.toAssignedMenuItemData(myUniqueName: myUniqueName, showShortTitles: settingsManager.showShortTitles) else { continue }
+                    let viewModel = PRMenuItemViewModel(pr: pr)
+                    assignedViewModels[pr.pullRequestId] = viewModel
                     let prView = PRMenuItemView(data: menuData) {
                         NSWorkspace.shared.open(menuData.url)
                     }
+                    assignedViews[pr.pullRequestId] = prView
                     prView.translatesAutoresizingMaskIntoConstraints = false
                     prView.heightAnchor.constraint(equalToConstant: 24).isActive = true
                     let item = NSMenuItem()
                     item.view = prView
                     menu.addItem(item)
+                    // --- ASYNC: Fetch policy summary (authoritative)
+                    PullRequestService.fetchPolicyEvaluationsSummary(projectId: pr.repository.project.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { summary in
+                        if let bs = summary.buildState { viewModel.buildValidationState = bs }
+                        viewModel.reviewersPolicyState = summary.reviewersState
+                        viewModel.buildValidationExpired = summary.buildExpired
+                        viewModel.buildFailedReason = summary.buildFailedReason
+                        DispatchQueue.main.async {
+                            let (statusText, statusColor) = viewModel.unifiedStatus.display
+                            var finalText = statusText
+                            if (viewModel.unifiedStatus == .buildFailed || viewModel.unifiedStatus == .buildExpired), let reason = viewModel.buildFailedReason {
+                                if viewModel.unifiedStatus == .buildFailed {
+                                    finalText = "Build validation failed: \(reason)"
+                                } else {
+                                    finalText = statusText // Keep "Build validation expired" as-is for expired
+                                }
+                            }
+                            print("Applying status for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
+                            prView.updateStatus(text: finalText, color: statusColor)
+                        }
+                    }
+                    // Optional: still log raw statuses but do not override policy-derived result
+                    PullRequestService.fetchStatusChecks(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { statuses in
+                        let stateStrs = statuses.map { $0.state.rawValue }
+                        print("Status check states for PR \(pr.pullRequestId): \(stateStrs)")
+                    }
+                    // --- ASYNC: Fetch unresolved comment count
+                    PullRequestService.fetchUnresolvedCommentCount(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { count in
+                        viewModel.unresolvedCommentCount = count
+                        DispatchQueue.main.async {
+                            prView.setUnresolvedCommentsCount(count)
+                            let (statusText, statusColor) = viewModel.unifiedStatus.display
+                            var finalText = statusText
+                            if (viewModel.unifiedStatus == .buildFailed || viewModel.unifiedStatus == .buildExpired), let reason = viewModel.buildFailedReason {
+                                if viewModel.unifiedStatus == .buildFailed {
+                                    finalText = "Build validation failed: \(reason)"
+                                } else {
+                                    finalText = statusText // Keep "Build validation expired" as-is for expired
+                                }
+                            }
+                            print("Applying status after comments for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
+                            prView.updateStatus(text: finalText, color: statusColor)
+                        }
+                    }
                 }
             }
         }
@@ -84,21 +135,58 @@ class MenuBuilder {
                 menu.addItem(openAllAuthoredItem)
                 for pr in authoredPRs {
                     let menuData = pr.toAuthoredMenuItemData(showShortTitles: settingsManager.showShortTitles)
+                    let viewModel = PRMenuItemViewModel(pr: pr)
+                    authoredViewModels[pr.pullRequestId] = viewModel
                     let prView = PRMenuItemView(data: menuData) {
                         NSWorkspace.shared.open(menuData.url)
                     }
+                    authoredViews[pr.pullRequestId] = prView
                     prView.translatesAutoresizingMaskIntoConstraints = false
                     prView.heightAnchor.constraint(equalToConstant: 24).isActive = true
                     let item = NSMenuItem()
                     item.view = prView
                     menu.addItem(item)
-
-                    // Fetch unresolved comment count and update menu item if needed
-                    PullRequestService.fetchUnresolvedCommentCount(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { count in
-                        if count > 0 {
-                            DispatchQueue.main.async {
-                                prView.setUnresolvedCommentsCount(count)
+                    // --- ASYNC: Fetch policy summary (authoritative)
+                    PullRequestService.fetchPolicyEvaluationsSummary(projectId: pr.repository.project.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { summary in
+                        if let bs = summary.buildState { viewModel.buildValidationState = bs }
+                        viewModel.reviewersPolicyState = summary.reviewersState
+                        viewModel.buildValidationExpired = summary.buildExpired
+                        viewModel.buildFailedReason = summary.buildFailedReason
+                        DispatchQueue.main.async {
+                            let (statusText, statusColor) = viewModel.unifiedStatus.display
+                            var finalText = statusText
+                            if (viewModel.unifiedStatus == .buildFailed || viewModel.unifiedStatus == .buildExpired), let reason = viewModel.buildFailedReason {
+                                if viewModel.unifiedStatus == .buildFailed {
+                                    finalText = "Build validation failed: \(reason)"
+                                } else {
+                                    finalText = statusText // Keep "Build validation expired" as-is for expired
+                                }
                             }
+                            print("Applying status for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
+                            prView.updateStatus(text: finalText, color: statusColor)
+                        }
+                    }
+                    // Optional: still log raw statuses but do not override policy-derived result
+                    PullRequestService.fetchStatusChecks(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { statuses in
+                        let stateStrs = statuses.map { $0.state.rawValue }
+                        print("Status check states for PR \(pr.pullRequestId): \(stateStrs)")
+                    }
+                    // --- ASYNC: Fetch unresolved comment count
+                    PullRequestService.fetchUnresolvedCommentCount(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { count in
+                        viewModel.unresolvedCommentCount = count
+                        DispatchQueue.main.async {
+                            prView.setUnresolvedCommentsCount(count)
+                            let (statusText, statusColor) = viewModel.unifiedStatus.display
+                            var finalText = statusText
+                            if (viewModel.unifiedStatus == .buildFailed || viewModel.unifiedStatus == .buildExpired), let reason = viewModel.buildFailedReason {
+                                if viewModel.unifiedStatus == .buildFailed {
+                                    finalText = "Build validation failed: \(reason)"
+                                } else {
+                                    finalText = statusText // Keep "Build validation expired" as-is for expired
+                                }
+                            }
+                            print("Applying status after comments for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
+                            prView.updateStatus(text: finalText, color: statusColor)
                         }
                     }
                 }

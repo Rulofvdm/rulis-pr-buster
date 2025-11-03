@@ -162,3 +162,4 @@ graph TD
 - **User Choice**: User can disable all notifications
 - **Transparent**: Clear indication of what notifications will be shown
 
+
