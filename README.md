@@ -2,6 +2,12 @@
 
 A macOS menu bar app for managing Azure DevOps Pull Requests with smart notifications and quick access.
 
+![PRBuster Screenshot](./readme-images/main-dropdown.png)
+
+![PRBuster Screenshot](./readme-images/main-dropdown-2.png)
+
+![PRBuster Screenshot](./readme-images/settings.png)
+
 ---
 
 ## Quick Start
