@@ -24,7 +24,7 @@ class PRMenuItemView: NSView {
     override var acceptsFirstResponder: Bool { true }
 
     // Modified: accept statusText and statusColor
-    convenience init(data: PRMenuItemData, onClick: (() -> Void)? = nil) {
+    convenience init(data: PRMenuItemData, showTargetBranch: Bool = true, onClick: (() -> Void)? = nil) {
         self.init(
             approval: data.approval,
             approvalColor: {
@@ -46,11 +46,12 @@ class PRMenuItemView: NSView {
             projectName: data.projectName,
             statusText: data.statusText,
             statusColor: data.statusColor,
+            showTargetBranch: showTargetBranch,
             onClick: onClick
         )
     }
 
-    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, isOverdue: Bool = false, projectName: String = "", statusText: String, statusColor: String, onClick: (() -> Void)? = nil) {
+    init(approval: String, approvalColor: NSColor, reviewerType: String, title: String, author: String, branch: String, reviewersStatus: String? = nil, url: URL, isOverdue: Bool = false, projectName: String = "", statusText: String, statusColor: String, showTargetBranch: Bool = true, onClick: (() -> Void)? = nil) {
         self.url = url
         super.init(frame: .zero)
         self.onClick = onClick
@@ -130,6 +131,7 @@ class PRMenuItemView: NSView {
         branchLabel.isEditable = false
         branchLabel.lineBreakMode = .byTruncatingTail
         branchLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        branchLabel.isHidden = !showTargetBranch
 
         reviewersStatusLabel.stringValue = reviewersStatus ?? ""
         reviewersStatusLabel.font = .systemFont(ofSize: 12, weight: .light)
@@ -160,7 +162,13 @@ class PRMenuItemView: NSView {
         projectLabel.translatesAutoresizingMaskIntoConstraints = false
 
         // Adjust stack view order: titleLabel, statusIndicatorField, branch, ...
-        let stack = NSStackView(views: [statusLabel, reviewerTypeLabel, titleLabel, statusIndicatorField, authorLabel, branchLabel, projectLabel, reviewersStatusLabel])
+        // Only include branchLabel if showTargetBranch is true
+        var stackViews: [NSView] = [statusLabel, reviewerTypeLabel, titleLabel, statusIndicatorField, authorLabel]
+        if showTargetBranch {
+            stackViews.append(branchLabel)
+        }
+        stackViews.append(contentsOf: [projectLabel, reviewersStatusLabel])
+        let stack = NSStackView(views: stackViews)
         stack.orientation = .horizontal
         stack.spacing = 8
         stack.alignment = .centerY

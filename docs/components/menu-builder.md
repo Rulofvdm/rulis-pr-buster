@@ -102,12 +102,14 @@ graph TD
 - **Approval Status**: Shows ✓ (approved) or ✗ (not approved)
 - **Color Coding**: Green for approved, red for not approved
 - **Overdue Indication**: Visual indicator for overdue PRs
+- **Target Branch**: Shows target branch (e.g., "→ main") when enabled in settings
 - **Click Action**: Opens PR in browser
 
 ### Authored PR Items
 - **Approval Count**: Shows "X ✓" format for approvals
 - **Color Coding**: Green for approved (2+ approvals), red for not approved
 - **Reviewer Status**: Shows reviewer names and approval status
+- **Target Branch**: Shows target branch (e.g., "→ main") when enabled in settings
 - **Comment Counts**: Fetches and displays unresolved comment counts
 - **Click Action**: Opens PR in browser
 
@@ -134,9 +136,10 @@ graph TD
 - **Error Handling**: Incorporates error messages from AppDelegate
 
 ### SettingsManager Integration
-- **Display Preferences**: Respects showAuthoredPRs and showAssignedPRs
+- **Display Preferences**: Respects showAuthoredPRs, showAssignedPRs, showShortTitles, and showTargetBranch
 - **User Configuration**: Adapts menu based on user settings
 - **Dynamic Updates**: Menu rebuilds when settings change
+- **Target Branch Display**: Conditionally includes target branch label based on showTargetBranch setting
 
 ### PullRequestService Integration
 - **Comment Counts**: Fetches unresolved comment counts for authored PRs

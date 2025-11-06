@@ -29,10 +29,16 @@ class QuickTest: XCTestCase {
         // Test setting values
         settingsManager.azureEmail = "test@example.com"
         settingsManager.azurePAT = "test-pat"
+        settingsManager.showTargetBranch = false
         
         XCTAssertTrue(settingsManager.isConfigured, "Should be configured with valid credentials")
         XCTAssertEqual(settingsManager.azureEmail, "test@example.com", "Email should be set")
         XCTAssertEqual(settingsManager.azurePAT, "test-pat", "PAT should be set")
+        XCTAssertFalse(settingsManager.showTargetBranch, "showTargetBranch should be false")
+        
+        // Test default value
+        let freshSettings = SettingsManager.shared
+        XCTAssertTrue(freshSettings.showTargetBranch, "Default showTargetBranch should be true")
     }
     
     func testPullRequestModels() {
@@ -79,6 +85,8 @@ class QuickTest: XCTestCase {
         XCTAssertFalse(defaultSettings.notificationsEnabled, "Default notifications should be false")
         XCTAssertEqual(defaultSettings.organization, "jobjack", "Default organization should be jobjack")
         XCTAssertEqual(defaultSettings.project, "Platform", "Default project should be Platform")
+        XCTAssertFalse(defaultSettings.showShortTitles, "Default showShortTitles should be false")
+        XCTAssertTrue(defaultSettings.showTargetBranch, "Default showTargetBranch should be true")
     }
     
     func testReviewerVoteEnum() {

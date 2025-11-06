@@ -185,8 +185,6 @@ extension PullRequestService {
                 completion([])
                 return
             }
-            let debugString = String(data: data, encoding: .utf8) ?? "(non-utf8-data)"
-            print("RAW Statuses response for PR \(pullRequestId):", debugString)
             // Attempt 1: decode { value: [...] }
             if let wrapped = try? JSONDecoder().decode(AzureStatusesResponse.self, from: data) {
                 completion(wrapped.value)
@@ -259,8 +257,6 @@ extension PullRequestService {
         request.setValue(authValue, forHTTPHeaderField: "Authorization")
         URLSession.shared.dataTask(with: request) { data, _, _ in
             guard let data = data else { completion(nil); return }
-            let debugString = String(data: data, encoding: .utf8) ?? "(non-utf8-data)"
-            print("RAW Policies response for PR \(pullRequestId):", debugString)
             // Try wrapped { value: [...] }
             if let wrapped = try? JSONDecoder().decode(PolicyEvaluationsResponse.self, from: data) {
                 let statuses = wrapped.value.map { $0.status.lowercased() }
@@ -329,8 +325,6 @@ extension PullRequestService {
         request.setValue(authValue, forHTTPHeaderField: "Authorization")
         URLSession.shared.dataTask(with: request) { data, _, _ in
             guard let data = data else { completion(PolicySummary(buildState: nil, reviewersState: .unknown, buildExpired: false, buildFailedReason: nil)); return }
-            let debugString = String(data: data, encoding: .utf8) ?? "(non-utf8-data)"
-            print("RAW Policies response (summary) for PR \(pullRequestId):", debugString)
             do {
                 let json = try JSONSerialization.jsonObject(with: data, options: [])
                 let list: [[String: Any]]

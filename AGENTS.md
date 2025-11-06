@@ -46,7 +46,7 @@ This document describes the AI agents and their roles in the PRBuster project. E
 
 **Configuration Categories**:
 - Azure DevOps credentials (email, PAT, organization, project)
-- Display preferences (show authored/assigned PRs, auto-refresh)
+- Display preferences (show authored/assigned PRs, auto-refresh, show short titles, show target branch)
 - Notification settings (enabled, types, timing, smart features)
 
 ### 3. PullRequestService Agent
@@ -139,8 +139,31 @@ This document describes the AI agents and their roles in the PRBuster project. E
 - Status indication and color coding
 - Click handling and URL opening
 - Visual state management
+- Conditional target branch display based on user preferences
+- Dynamic status label updates from view model
 
-### 8. PasteableSecureTextField Agent
+### 8. PRMenuItemViewModel Agent
+**Role**: Dynamic PR status state manager
+**Responsibilities**:
+- Manages mutable UI state for PR menu items
+- Status precedence logic and unified status determination
+- Aggregates data from multiple async API sources
+- Tracks build state, comment counts, policy states, expiration, and failure reasons
+- Provides single source of truth for status display
+
+**Key Capabilities**:
+- Status precedence ordering (build failed > unresolved comments > checks running > waiting states > ready)
+- Real-time status updates as async data arrives
+- Build failure reason extraction and display
+- Reviewer policy state tracking
+- Centralized status computation logic
+
+**Integration Points**:
+- PullRequestService (receives API data)
+- MenuBuilder (updates state, queries status)
+- PRMenuItemView (displays unified status)
+
+### 9. PasteableSecureTextField Agent
 **Role**: Secure credential input specialist
 **Responsibilities**:
 - Secure text input for credentials
@@ -150,7 +173,7 @@ This document describes the AI agents and their roles in the PRBuster project. E
 
 ## Data Flow Agents
 
-### 9. Data Flow Coordinator Agent
+### 10. Data Flow Coordinator Agent
 **Role**: Manages data flow between components
 **Responsibilities**:
 - Coordinates data fetching operations
@@ -163,7 +186,7 @@ This document describes the AI agents and their roles in the PRBuster project. E
 - PR data fetching → State updates → UI updates
 - Error states → User feedback → Recovery options
 
-### 10. Error Handling Agent
+### 11. Error Handling Agent
 **Role**: Centralized error management and recovery
 **Responsibilities**:
 - Error detection and classification
@@ -179,7 +202,7 @@ This document describes the AI agents and their roles in the PRBuster project. E
 
 ## Integration Agents
 
-### 11. Azure DevOps Integration Agent
+### 12. Azure DevOps Integration Agent
 **Role**: External API integration specialist
 **Responsibilities**:
 - Azure DevOps API communication
@@ -187,7 +210,7 @@ This document describes the AI agents and their roles in the PRBuster project. E
 - Data format conversion
 - API version management
 
-### 12. macOS Integration Agent
+### 13. macOS Integration Agent
 **Role**: macOS system integration specialist
 **Responsibilities**:
 - Status bar integration
@@ -240,6 +263,7 @@ MenuBuilder Agent (UI update)
 | NotificationManager | - | - | - | ✓ | ✓ |
 | MenuBuilder | - | - | ✓ | - | ✓ |
 | SettingsWindowController | ✓ | - | ✓ | - | ✓ |
+| PRMenuItemViewModel | - | - | - | - | - |
 
 ## Usage Guidelines
 
@@ -257,9 +281,10 @@ MenuBuilder Agent (UI update)
 - **Core logic**: Work with AppDelegate Agent
 
 ### For Adding New Features
-- **New settings**: Extend SettingsManager Agent
-- **New API endpoints**: Extend PullRequestService Agent
-- **New UI elements**: Extend MenuBuilder Agent
+- **New settings**: Extend SettingsManager Agent (e.g., showTargetBranch toggle)
+- **New API endpoints**: Extend PullRequestService Agent (e.g., fetchStatusChecks, fetchPolicyEvaluationsSummary)
+- **New UI elements**: Extend MenuBuilder Agent or PRMenuItemView Agent
+- **New status types**: Extend PRMenuItemViewModel Agent
 - **New notifications**: Extend NotificationManager Agent
 - **New core functionality**: Extend AppDelegate Agent
 

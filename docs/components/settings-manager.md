@@ -24,6 +24,8 @@ Centralized settings management with persistence, providing a single source of t
 - **Show Assigned PRs**: Toggle visibility of assigned PRs in menu
 - **Auto-refresh**: Enable/disable automatic data refresh
 - **Refresh Interval**: Time between automatic refreshes (in seconds)
+- **Show Short Titles**: Show only first 8 characters of PR titles
+- **Show Target Branch**: Toggle visibility of target branch in PR dropdown items
 
 #### Notification Settings
 - **Notifications Enabled**: Master toggle for all notifications
@@ -89,6 +91,8 @@ struct AppSettings: Codable {
     var includePRCount: Bool
     var organization: String
     var project: String
+    var showShortTitles: Bool
+    var showTargetBranch: Bool
 }
 ```
 
@@ -146,6 +150,8 @@ struct AppSettings: Codable {
 - **Show Assigned PRs**: true
 - **Auto-refresh**: true
 - **Refresh Interval**: 60 seconds (1 minute)
+- **Show Short Titles**: false
+- **Show Target Branch**: true
 
 ### Notifications
 - **Notifications Enabled**: false (opt-in)

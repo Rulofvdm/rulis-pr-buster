@@ -23,6 +23,8 @@ Provides a comprehensive settings interface for configuring all application pref
 - **Show Authored PRs**: Checkbox to toggle authored PR visibility
 - **Show Assigned PRs**: Checkbox to toggle assigned PR visibility
 - **Auto-refresh**: Checkbox to enable/disable automatic refresh
+- **Show Short Titles**: Checkbox to show only first 8 characters of PR titles
+- **Show Target Branch**: Checkbox to toggle target branch display in dropdown
 - **Refresh Interval**: Text field for refresh interval in minutes
 
 #### Notifications Section
@@ -90,7 +92,7 @@ graph TD
 
 ### Display Section
 - **Section Label**: "Display" in bold
-- **Checkboxes**: Show authored/assigned PRs, auto-refresh
+- **Checkboxes**: Show authored/assigned PRs, auto-refresh, show short titles, show target branch
 - **Refresh Interval**: Label + text field (enabled when auto-refresh on)
 
 ### Notifications Section

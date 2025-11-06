@@ -24,6 +24,7 @@ struct AppSettings: Codable {
     
     // Display settings
     var showShortTitles: Bool // Show only first 8 characters of PR titles
+    var showTargetBranch: Bool // Show target branch in dropdown
     
     static let `default` = AppSettings(
         azureEmail: "",
@@ -42,6 +43,7 @@ struct AppSettings: Codable {
         includePRCount: true,
         organization: "jobjack", // Default value
         project: "Platform",    // Default value
-        showShortTitles: false  // Default to showing full titles
+        showShortTitles: false,  // Default to showing full titles
+        showTargetBranch: true    // Default to showing target branch
     )
 } 

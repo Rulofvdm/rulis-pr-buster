@@ -6,6 +6,7 @@ class SettingsWindowController: NSWindowController {
     let showAssignedCheckbox = NSButton(checkboxWithTitle: "Show PRs assigned to me", target: nil, action: nil)
     let autoRefreshCheckbox = NSButton(checkboxWithTitle: "Enable auto-refresh", target: nil, action: nil)
     let showShortTitlesCheckbox = NSButton(checkboxWithTitle: "Show only first 8 characters of titles", target: nil, action: nil)
+    let showTargetBranchCheckbox = NSButton(checkboxWithTitle: "Show target branch", target: nil, action: nil)
     let refreshIntervalField = NSTextField(string: "")
     let emailField = NSTextField(string: "")
     let organizationField = NSTextField(string: "")
@@ -93,6 +94,7 @@ class SettingsWindowController: NSWindowController {
         displayStack.addArrangedSubview(showAssignedCheckbox)
         displayStack.addArrangedSubview(autoRefreshCheckbox)
         displayStack.addArrangedSubview(showShortTitlesCheckbox)
+        displayStack.addArrangedSubview(showTargetBranchCheckbox)
         let refreshRow = NSStackView(views: [NSTextField(labelWithString: "Refresh interval (minutes):"), refreshIntervalField])
         refreshRow.orientation = .horizontal
         refreshRow.spacing = 8
@@ -135,6 +137,7 @@ class SettingsWindowController: NSWindowController {
         showAssignedCheckbox.state = settingsManager.showAssignedPRs ? .on : .off
         autoRefreshCheckbox.state = settingsManager.autoRefreshEnabled ? .on : .off
         showShortTitlesCheckbox.state = settingsManager.showShortTitles ? .on : .off
+        showTargetBranchCheckbox.state = settingsManager.showTargetBranch ? .on : .off
         refreshIntervalField.stringValue = "\(settingsManager.refreshInterval / 60)"
         notificationsEnabledCheckbox.state = settingsManager.notificationsEnabled ? .on : .off
         newPRNotificationsCheckbox.state = settingsManager.newPRNotifications ? .on : .off
@@ -162,6 +165,8 @@ class SettingsWindowController: NSWindowController {
         autoRefreshCheckbox.action = #selector(toggleChanged)
         showShortTitlesCheckbox.target = self
         showShortTitlesCheckbox.action = #selector(toggleChanged)
+        showTargetBranchCheckbox.target = self
+        showTargetBranchCheckbox.action = #selector(toggleChanged)
         refreshIntervalField.target = self
         refreshIntervalField.action = #selector(textFieldChanged)
         notificationsEnabledCheckbox.target = self
@@ -227,6 +232,7 @@ class SettingsWindowController: NSWindowController {
         settingsManager.showAssignedPRs = showAssignedCheckbox.state == .on
         settingsManager.autoRefreshEnabled = autoRefreshCheckbox.state == .on
         settingsManager.showShortTitles = showShortTitlesCheckbox.state == .on
+        settingsManager.showTargetBranch = showTargetBranchCheckbox.state == .on
         refreshIntervalField.isEnabled = autoRefreshCheckbox.state == .on
         (NSApp.delegate as? AppDelegate)?.buildMenu()
         (NSApp.delegate as? AppDelegate)?.startRefreshTimer()
@@ -478,6 +484,7 @@ extension SettingsWindowController: NSWindowDelegate {
         settingsManager.showAssignedPRs = showAssignedCheckbox.state == .on
         settingsManager.autoRefreshEnabled = autoRefreshCheckbox.state == .on
         settingsManager.showShortTitles = showShortTitlesCheckbox.state == .on
+        settingsManager.showTargetBranch = showTargetBranchCheckbox.state == .on
         if let intervalMinutes = Int(refreshIntervalField.stringValue) {
             settingsManager.refreshInterval = intervalMinutes * 60
         }

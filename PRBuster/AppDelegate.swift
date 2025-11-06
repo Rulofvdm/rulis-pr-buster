@@ -36,10 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if settingsManager.notificationsEnabled {
             notificationManager.requestNotificationPermissions { granted in
                 if granted {
-                    print("Notification permissions granted")
                     self.notificationManager.updateNotificationSchedules()
-                } else {
-                    print("Notification permissions denied")
                 }
             }
         }
@@ -142,7 +139,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func refreshPRs() {
         // Only fetch PRs if credentials are present
         guard settingsManager.isConfigured, !settingsManager.azureEmail.isEmpty, !settingsManager.azurePAT.isEmpty else {
-            print("Skipping PR fetch: credentials not set.")
             return
         }
         PullRequestService.fetchAssignedPRs(email: settingsManager.azureEmail, pat: settingsManager.azurePAT) { [weak self] prs in

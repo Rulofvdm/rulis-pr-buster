@@ -107,6 +107,11 @@ class SettingsManager: ObservableObject {
         set { settings.showShortTitles = newValue }
     }
     
+    var showTargetBranch: Bool {
+        get { settings.showTargetBranch }
+        set { settings.showTargetBranch = newValue }
+    }
+    
     var isConfigured: Bool {
         !settings.azureEmail.isEmpty && !settings.azurePAT.isEmpty
     }
@@ -134,7 +139,8 @@ class SettingsManager: ObservableObject {
                 includePRCount: userDefaults.object(forKey: "includePRCount") as? Bool ?? true,
                 organization: userDefaults.string(forKey: "organization") ?? "jobjack",
                 project: userDefaults.string(forKey: "project") ?? "Platform",
-                showShortTitles: userDefaults.object(forKey: "showShortTitles") as? Bool ?? false
+                showShortTitles: userDefaults.object(forKey: "showShortTitles") as? Bool ?? false,
+                showTargetBranch: userDefaults.object(forKey: "showTargetBranch") as? Bool ?? true
             )
         }
         return settings
@@ -155,6 +161,7 @@ class SettingsManager: ObservableObject {
             userDefaults.set(settings.organization, forKey: "organization")
             userDefaults.set(settings.project, forKey: "project")
             userDefaults.set(settings.showShortTitles, forKey: "showShortTitles")
+            userDefaults.set(settings.showTargetBranch, forKey: "showTargetBranch")
             
             userDefaults.synchronize()
         } catch {

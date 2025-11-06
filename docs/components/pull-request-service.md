@@ -39,6 +39,20 @@ Handles all Azure DevOps API interactions for fetching pull request data, includ
 - **Filtering**: Filters threads by "active" status
 - **Completion**: Returns integer count of unresolved comments
 
+### `fetchStatusChecks`
+- **Purpose**: Fetches real-time status check states for a PR
+- **API Endpoint**: `/git/repositories/{repoId}/pullRequests/{prId}/statuses`
+- **API Version**: `7.1-preview.1`
+- **Response Handling**: Handles varying JSON response formats (wrapped and unwrapped arrays)
+- **Completion**: Returns array of PRStatusCheck objects with state information
+
+### `fetchPolicyEvaluationsSummary`
+- **Purpose**: Fetches comprehensive build and reviewer policy status for a PR
+- **API Endpoint**: `/policy/evaluations?artifactId={projectId}&artifactId2={pullRequestId}`
+- **API Version**: `7.1-preview.1`
+- **Response Handling**: Resilient parsing for missing/optional fields, extracts build output preview
+- **Completion**: Returns PolicySummary with build state, reviewers policy state, expiration status, and failure reasons
+
 ## API Integration Details
 
 ### Authentication Method

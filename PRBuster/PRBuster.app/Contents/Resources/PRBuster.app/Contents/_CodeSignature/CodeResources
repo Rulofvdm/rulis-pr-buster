@@ -8,26 +8,6 @@
 		<data>
 		+cyo4WGdReSOsBitYeQKeXaK/GA=
 		</data>
-		<key>Resources/PRBuster.app/Contents/Info.plist</key>
-		<data>
-		V2Oag2Q4FgTRPiz9YeUVeGQtYLs=
-		</data>
-		<key>Resources/PRBuster.app/Contents/MacOS/PRBuster</key>
-		<data>
-		/XBQaGOOjntGTFYpUfudetO/cLs=
-		</data>
-		<key>Resources/PRBuster.app/Contents/PkgInfo</key>
-		<data>
-		n57qDP4tZfLD1rCS43W0B4LQjzE=
-		</data>
-		<key>Resources/PRBuster.app/Contents/Resources/Info.plist</key>
-		<data>
-		+cyo4WGdReSOsBitYeQKeXaK/GA=
-		</data>
-		<key>Resources/PRBuster.app/Contents/_CodeSignature/CodeResources</key>
-		<data>
-		NQvJZ9Cwx0mJqi/69RSBJIEtshQ=
-		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
@@ -36,41 +16,6 @@
 			<key>hash2</key>
 			<data>
 			Gs2gvoY1dAbXADc2AqOdMirX9UnShX73J23ZXz+Tglc=
-			</data>
-		</dict>
-		<key>Resources/PRBuster.app/Contents/Info.plist</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			FtpnNzkA07HKN93UXWqD8fyqJsV9gwiBFjUsiMbI/Ac=
-			</data>
-		</dict>
-		<key>Resources/PRBuster.app/Contents/MacOS/PRBuster</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			XFj6hrDdUN5jsy2ItQOZJOJ3h0Uj7/KxziZbTbJmwaM=
-			</data>
-		</dict>
-		<key>Resources/PRBuster.app/Contents/PkgInfo</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			glAhkclISwTWhTdPmHmgBmBpxJuKyuegSwHTjQfo7KA=
-			</data>
-		</dict>
-		<key>Resources/PRBuster.app/Contents/Resources/Info.plist</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			Gs2gvoY1dAbXADc2AqOdMirX9UnShX73J23ZXz+Tglc=
-			</data>
-		</dict>
-		<key>Resources/PRBuster.app/Contents/_CodeSignature/CodeResources</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			5z1Ufe7l88IyIJ+uSIT3zk1GnldbXtH+Cp9QT7k3avg=
 			</data>
 		</dict>
 	</dict>

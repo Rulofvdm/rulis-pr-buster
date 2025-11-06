@@ -60,7 +60,7 @@ class MenuBuilder {
                     guard let menuData = pr.toAssignedMenuItemData(myUniqueName: myUniqueName, showShortTitles: settingsManager.showShortTitles) else { continue }
                     let viewModel = PRMenuItemViewModel(pr: pr)
                     assignedViewModels[pr.pullRequestId] = viewModel
-                    let prView = PRMenuItemView(data: menuData) {
+                    let prView = PRMenuItemView(data: menuData, showTargetBranch: settingsManager.showTargetBranch) {
                         NSWorkspace.shared.open(menuData.url)
                     }
                     assignedViews[pr.pullRequestId] = prView
@@ -85,14 +85,12 @@ class MenuBuilder {
                                     finalText = statusText // Keep "Build validation expired" as-is for expired
                                 }
                             }
-                            print("Applying status for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
                             prView.updateStatus(text: finalText, color: statusColor)
                         }
                     }
-                    // Optional: still log raw statuses but do not override policy-derived result
-                    PullRequestService.fetchStatusChecks(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { statuses in
-                        let stateStrs = statuses.map { $0.state.rawValue }
-                        print("Status check states for PR \(pr.pullRequestId): \(stateStrs)")
+                    // Optional: fetch status checks but do not override policy-derived result
+                    PullRequestService.fetchStatusChecks(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { _ in
+                        // Status checks fetched for potential future use
                     }
                     // --- ASYNC: Fetch unresolved comment count
                     PullRequestService.fetchUnresolvedCommentCount(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { count in
@@ -108,7 +106,6 @@ class MenuBuilder {
                                     finalText = statusText // Keep "Build validation expired" as-is for expired
                                 }
                             }
-                            print("Applying status after comments for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
                             prView.updateStatus(text: finalText, color: statusColor)
                         }
                     }
@@ -137,7 +134,7 @@ class MenuBuilder {
                     let menuData = pr.toAuthoredMenuItemData(showShortTitles: settingsManager.showShortTitles)
                     let viewModel = PRMenuItemViewModel(pr: pr)
                     authoredViewModels[pr.pullRequestId] = viewModel
-                    let prView = PRMenuItemView(data: menuData) {
+                    let prView = PRMenuItemView(data: menuData, showTargetBranch: settingsManager.showTargetBranch) {
                         NSWorkspace.shared.open(menuData.url)
                     }
                     authoredViews[pr.pullRequestId] = prView
@@ -162,14 +159,12 @@ class MenuBuilder {
                                     finalText = statusText // Keep "Build validation expired" as-is for expired
                                 }
                             }
-                            print("Applying status for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
                             prView.updateStatus(text: finalText, color: statusColor)
                         }
                     }
-                    // Optional: still log raw statuses but do not override policy-derived result
-                    PullRequestService.fetchStatusChecks(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { statuses in
-                        let stateStrs = statuses.map { $0.state.rawValue }
-                        print("Status check states for PR \(pr.pullRequestId): \(stateStrs)")
+                    // Optional: fetch status checks but do not override policy-derived result
+                    PullRequestService.fetchStatusChecks(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { _ in
+                        // Status checks fetched for potential future use
                     }
                     // --- ASYNC: Fetch unresolved comment count
                     PullRequestService.fetchUnresolvedCommentCount(repositoryId: pr.repository.id, pullRequestId: pr.pullRequestId, pat: settingsManager.azurePAT) { count in
@@ -185,7 +180,6 @@ class MenuBuilder {
                                     finalText = statusText // Keep "Build validation expired" as-is for expired
                                 }
                             }
-                            print("Applying status after comments for PR \(pr.pullRequestId): \(finalText) [color=\(statusColor)]")
                             prView.updateStatus(text: finalText, color: statusColor)
                         }
                     }
