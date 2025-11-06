@@ -9,7 +9,8 @@ class MenuBuilder {
         refreshPRs: Selector,
         statusItem: NSStatusItem?,
         target: AnyObject?,
-        errorMessage: String? = nil
+        errorMessage: String? = nil,
+        newRelease: GitHubRelease? = nil
     ) -> NSMenu {
         let menu = NSMenu()
         let myUniqueName = settingsManager.azureEmail
@@ -26,6 +27,20 @@ class MenuBuilder {
             let errorItem = NSMenuItem(title: errorMessage, action: nil, keyEquivalent: "")
             errorItem.isEnabled = false
             menu.addItem(errorItem)
+            menu.addItem(NSMenuItem.separator())
+        }
+        
+        // Show new release notification if available
+        if let release = newRelease {
+            let releaseItem = NSMenuItem(title: "🆕 New release available: \(release.tagName)", action: #selector(MenuBuilder.openReleasesPage(_:)), keyEquivalent: "")
+            releaseItem.target = MenuBuilder.shared
+            releaseItem.setAccessibilityLabel("New release available: \(release.tagName)")
+            // Make it stand out with bold text
+            releaseItem.attributedTitle = NSAttributedString(
+                string: "🆕 New release available: \(release.tagName)",
+                attributes: [.font: NSFont.boldSystemFont(ofSize: 13)]
+            )
+            menu.addItem(releaseItem)
             menu.addItem(NSMenuItem.separator())
         }
         
@@ -267,6 +282,12 @@ class MenuBuilder {
             for url in urls {
                 NSWorkspace.shared.open(url)
             }
+        }
+    }
+    
+    @objc func openReleasesPage(_ sender: NSMenuItem) {
+        if let url = ReleaseChecker.releasesPageURL {
+            NSWorkspace.shared.open(url)
         }
     }
 } 

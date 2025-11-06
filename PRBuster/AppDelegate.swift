@@ -13,6 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Track previous PR state for new PR detection
     private var previousAssignedPRIds: Set<Int> = []
     var errorMessage: String? = nil
+    var newRelease: GitHubRelease? = nil
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Ensure app doesn't appear in dock
@@ -40,6 +41,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+        
+        // Check for new releases
+        checkForNewRelease()
         
         // Only fetch PRs if credentials are present
         if settingsManager.isConfigured && !settingsManager.azureEmail.isEmpty && !settingsManager.azurePAT.isEmpty {
@@ -131,12 +135,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             refreshPRs: #selector(refreshPRs),
             statusItem: statusItem,
             target: self,
-            errorMessage: errorMessage
+            errorMessage: errorMessage,
+            newRelease: newRelease
         )
         statusItem?.menu = menu
     }
+    
+    private func checkForNewRelease() {
+        ReleaseChecker.checkForNewRelease { [weak self] release in
+            DispatchQueue.main.async {
+                self?.newRelease = release
+                // Rebuild menu if it's already been built
+                if self?.statusItem?.menu != nil {
+                    self?.buildMenu()
+                }
+            }
+        }
+    }
 
     @objc func refreshPRs() {
+        // Check for new releases on refresh as well
+        checkForNewRelease()
+        
         // Only fetch PRs if credentials are present
         guard settingsManager.isConfigured, !settingsManager.azureEmail.isEmpty, !settingsManager.azurePAT.isEmpty else {
             return
